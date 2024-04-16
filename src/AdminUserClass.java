@@ -182,10 +182,13 @@ public class AdminUserClass extends User{
                 System.out.println("Write unique number: ");
                 uniqueNumber = getSc().nextLine();
 
+
                 if (uniqueNumbers.contains(uniqueNumber)) {
                     System.out.println("Error: Unique number already exists. Please enter a different one.");
                 }
+
             } while (uniqueNumbers.contains(uniqueNumber));
+            uniqueNumbers.add(uniqueNumber);
 
 
             Book book = new Book(title, author, genre, resume, rel, key_words, rat, uniqueNumber);
@@ -229,21 +232,22 @@ public class AdminUserClass extends User{
             NormalUserClass normal_user = new NormalUserClass(username, password, false);
             normal_users.add(normal_user);
             System.out.println("Successfully added a user.");
+            uniqueUsername.add(username);
         }catch (InvalidUsernameException e){
             System.out.println(e.getMessage());
         }catch (InvalidPasswordException e){
             System.out.println(e.getMessage());
         }
     }
-    public  void removeUser(ArrayList<NormalUserClass> normal_users, int id) {
+    public  void removeUser(ArrayList<NormalUserClass> normal_users,String username) {
         for (NormalUserClass normal_user : normal_users) {
-            if (normal_user.getId() == id) {
+            if (normal_user.getUsername().equals(username)) {
                 normal_users.remove(normal_user);
                 System.out.println("User with username " + normal_user.getUsername() + " has been removed.");
                 return;
             }
         }
-        System.out.println("User with id number " + id + " is not found.");
+        System.out.println("User with id number " + username + " is not found.");
     }
 
 }

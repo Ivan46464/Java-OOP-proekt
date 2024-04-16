@@ -7,7 +7,7 @@ import java.util.HashSet;
 
 public class Main {
     public static void main(String[] args) throws Exception{
-        try {
+/*        try {
             ArrayList<Book> books = new ArrayList<>();
             ArrayList<NormalUserClass> NormalUsers = new ArrayList<>();
             AdminUserClass AdminUser = new AdminUserClass("admin", "i<3c++", true);
@@ -245,6 +245,7 @@ public class Main {
                                         String username = words[2];
                                         String password = words[3];
                                         if(CurentUser instanceof AdminUserClass) {
+
                                             ((AdminUserClass)CurentUser).addUser(NormalUsers, username, password,uniqueUsername);
                                         }
                                         else{
@@ -256,10 +257,9 @@ public class Main {
                                     break;
                                 case "remove":
                                     if (words.length > 2) {
-                                        String id = words[2];
-                                        int id_int = Integer.parseInt(id);
+                                        String username = words[2];
                                         if(CurentUser instanceof AdminUserClass) {
-                                            ((AdminUserClass)CurentUser).removeUser(NormalUsers,id_int);
+                                            ((AdminUserClass)CurentUser).removeUser(NormalUsers,username);
                                         }
                                         else{
                                             System.out.println("You should be admin to add users.");
@@ -289,6 +289,9 @@ public class Main {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+*/
+        Operations operations = new Operations();
+        operations.startCommandPrompt();
     }
 
 }

@@ -60,7 +60,7 @@ public class NormalUserClass extends User implements Serializable {
     public void bookFind(ArrayList<Book> books, String tag ,String word) {
         Book book_to_find = null;
         for (Book book : books) {
-            if (book.getUnique_number().equals(word)) {
+            if (book.getUniqueNumber().equals(word)) {
                 book_to_find = book;
                 break;
             }
@@ -77,7 +77,7 @@ public class NormalUserClass extends User implements Serializable {
         if (book_to_find != null) {
             System.out.println("Book's title: " + book_to_find.getTitle());
             System.out.println("Book's author: " + book_to_find.getAuthor());
-            System.out.println("Book's unique number: "+ book_to_find.getUnique_number());
+            System.out.println("Book's unique number: "+ book_to_find.getUniqueNumber());
         }
         else {
             System.out.println("Book with " + tag + " is not found.");
@@ -89,7 +89,7 @@ public class NormalUserClass extends User implements Serializable {
                 System.out.println("Tittle: " + book.getTitle());
                 System.out.println("Author: " + book.getAuthor());
                 System.out.println("Genre: " + book.getGenre());
-                System.out.println("Unique number: " + book.getUnique_number());
+                System.out.println("Unique number: " + book.getUniqueNumber());
             }
         }else{
             System.out.println("There is no books in the library.");
@@ -99,7 +99,7 @@ public class NormalUserClass extends User implements Serializable {
     public void bookInfo(ArrayList<Book> books, String unique_number){
         Book bookInfo = null;
         for(Book book:books){
-            if(book.getUnique_number().equals(unique_number)){
+            if(book.getUniqueNumber().equals(unique_number)){
                 bookInfo=book;
             }
         }
@@ -118,7 +118,7 @@ public class NormalUserClass extends User implements Serializable {
             }
             System.out.println("Key words: " + output);
             System.out.println("Rating: " + bookInfo.getRating());
-            System.out.println("Unique number: " + bookInfo.getUnique_number());
+            System.out.println("Unique number: " + bookInfo.getUniqueNumber());
         }
         else{
             System.out.println("Book with this unique number is not found in our library.");
