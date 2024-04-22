@@ -49,7 +49,7 @@ public class Operations {
     private void handleCommand(String[] words) throws Exception {
         switch (words[0]) {
             case "open":
-                openFile(words, normalUsers);
+                openFile(words);
                 break;
             case "save":
                 saveFile();
@@ -64,10 +64,10 @@ public class Operations {
                 displayHelp();
                 break;
             case "login":
-                login(words, normalUsers, adminUser, nonUser);
+                login(words);
                 break;
             case "logout":
-                logout(nonUser);
+                logout();
                 break;
             case "exit":
                 break;
@@ -83,7 +83,7 @@ public class Operations {
         }
     }
 
-    private void openFile(String[] words, ArrayList<NormalUserClass> normalUsers) {
+    private void openFile(String[] words) {
         if (!this.fileOpened && words.length == 2) {
             fileName = words[1];
             FileHandler.readFromFile(fileName, books, normalUsers,uniqueNumbers,uniqueUsernames);
@@ -147,7 +147,7 @@ public class Operations {
         System.out.println("users remove <user_id> Deletes the user with username id <user_id> from the file.");
     }
 
-    private void login(String[] words, ArrayList<NormalUserClass> normalUsers, AdminUserClass adminUser, NonUserClass nonUser) {
+    private void login(String[] words) {
         if (words.length < 2) {
             if (currentUser instanceof NonUserClass) {
                 currentUser = ((NonUserClass) currentUser).login(normalUsers, adminUser, nonUser);
@@ -157,7 +157,7 @@ public class Operations {
         }
     }
 
-    private void logout(NonUserClass nonUser) {
+    private void logout() {
         if (currentUser instanceof AdminUserClass) {
             currentUser = ((AdminUserClass) currentUser).logout(nonUser);
         } else if (currentUser instanceof NormalUserClass) {
