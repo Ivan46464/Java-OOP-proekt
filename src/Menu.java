@@ -1,11 +1,9 @@
 import java.io.BufferedReader;
-import java.io.Console;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class Operations {
+public class Menu {
     private ArrayList<Book> books;
     private ArrayList<NormalUserClass> normalUsers;
     private AdminUserClass adminUser;
@@ -17,7 +15,7 @@ public class Operations {
     boolean fileOpened = false;
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-    public Operations() throws Exception {
+    public Menu() throws Exception {
         books = new ArrayList<>();
         normalUsers = new ArrayList<>();
         adminUser = new AdminUserClass("admin", "i<3c++", true);
@@ -72,11 +70,24 @@ public class Operations {
             case "exit":
                 break;
             case "books":
-                handleBooksCommand(words);
-                break;
+                if (fileOpened){
+                    handleBooksCommand(words);
+                    break;
+                    }
+                else {
+                    System.out.println("Open file first");
+                    break;
+                }
+
             case "users":
-                handleUsersCommand(words);
-                break;
+                if (fileOpened) {
+                    handleUsersCommand(words);
+                    break;
+                }
+                else {
+                    System.out.println("Open file first");
+                    break;
+                }
             default:
                 System.out.println("Unknown command type help.");
                 break;
@@ -124,6 +135,8 @@ public class Operations {
             fileName = null;
             books.clear();
             normalUsers.clear();
+            uniqueNumbers.clear();
+            uniqueUsernames.clear();
         } else {
             System.out.println("No file is currently opened.");
         }
