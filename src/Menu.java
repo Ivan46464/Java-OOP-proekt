@@ -1,9 +1,13 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class Menu {
+    private final Map<String, Consumer<String[]>> commandHandlers;
     private ArrayList<Book> books;
     private ArrayList<NormalUserClass> normalUsers;
     private AdminUserClass adminUser;
@@ -12,10 +16,46 @@ public class Menu {
     private String fileName;
     private HashSet<String> uniqueNumbers;
     private HashSet<String> uniqueUsernames;
-    boolean fileOpened = false;
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    private boolean fileOpened = false;
+    private final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
     public Menu() throws Exception {
+        commandHandlers = new HashMap<>();
+        commandHandlers.put("open", this::openFile);
+        commandHandlers.put("save",s -> saveFile());
+        commandHandlers.put("saveas", this::saveFileAs);
+        commandHandlers.put("close", s -> closeFile());
+        commandHandlers.put("help", s -> displayHelp());
+        commandHandlers.put("login", this::login);
+        commandHandlers.put("logout", s -> logout());
+        commandHandlers.put("exit", s -> {});
+        commandHandlers.put("books", words -> {
+            if (fileOpened) {
+                try {
+                    handleBooksCommand(words);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                System.out.println("Open a file first.");
+            }
+        });
+        commandHandlers.put("users", words -> {
+            if (fileOpened) {
+                if (currentUser instanceof AdminUserClass) {
+                    try {
+                        handleUsersCommand(words);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    System.out.println("You must be logged in as adminUser to access user commands.");
+                }
+            } else {
+                System.out.println("Open a file first.");
+            }
+        });
+
         books = new ArrayList<>();
         normalUsers = new ArrayList<>();
         adminUser = new AdminUserClass("admin", "i<3c++", true);
@@ -44,54 +84,13 @@ public class Menu {
         }
     }
 
-    private void handleCommand(String[] words) throws Exception {
-        switch (words[0]) {
-            case "open":
-                openFile(words);
-                break;
-            case "save":
-                saveFile();
-                break;
-            case "saveas":
-                saveFileAs(words);
-                break;
-            case "close":
-                closeFile();
-                break;
-            case "help":
-                displayHelp();
-                break;
-            case "login":
-                login(words);
-                break;
-            case "logout":
-                logout();
-                break;
-            case "exit":
-                break;
-            case "books":
-                if (fileOpened){
-                    handleBooksCommand(words);
-                    break;
-                    }
-                else {
-                    System.out.println("Open file first");
-                    break;
-                }
+    private void handleCommand(String[] words) {
+        Consumer<String[]> commandHandler = commandHandlers.getOrDefault(words[0], this::unknownCommand);
+        commandHandler.accept(words);
+    }
 
-            case "users":
-                if (fileOpened) {
-                    handleUsersCommand(words);
-                    break;
-                }
-                else {
-                    System.out.println("Open file first");
-                    break;
-                }
-            default:
-                System.out.println("Unknown command type help.");
-                break;
-        }
+    private void unknownCommand(String[] words) {
+        System.out.println("Unknown command type help.");
     }
 
     private void openFile(String[] words) {
@@ -362,7 +361,7 @@ public class Menu {
         if (words.length > 2) {
             String username = words[2];
             if(currentUser instanceof AdminUserClass) {
-                ((AdminUserClass)currentUser).removeUser(normalUsers, username);
+                ((AdminUserClass)currentUser).removeUser(normalUsers, username,uniqueUsernames);
             }
             else{
                 System.out.println("You should be admin to add users.");

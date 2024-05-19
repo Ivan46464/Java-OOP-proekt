@@ -3,20 +3,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class NormalUserClass extends User implements Serializable {
-
-
-    private int id;
-    private static int last_id = 0;
     public NormalUserClass(String username, String password, Boolean availability)throws Exception{
         super(username, password, availability);
-        setId(++last_id);
-    }
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
     public void bookSort(ArrayList<Book> books, String tag, String order){
         if(!books.isEmpty()) {

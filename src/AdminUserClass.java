@@ -239,10 +239,16 @@ public class AdminUserClass extends User{
             System.out.println(e.getMessage());
         }
     }
-    public  void removeUser(ArrayList<NormalUserClass> normal_users,String username) {
+    public  void removeUser(ArrayList<NormalUserClass> normal_users,String username,HashSet<String> users) {
         for (NormalUserClass normal_user : normal_users) {
             if (normal_user.getUsername().equals(username)) {
                 normal_users.remove(normal_user);
+                for(String user: users){
+                    if(username.equals(user)){
+                        users.remove(user);
+                        break;
+                    }
+                }
                 System.out.println("User with username " + normal_user.getUsername() + " has been removed.");
                 return;
             }
