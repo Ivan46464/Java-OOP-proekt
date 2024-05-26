@@ -21,6 +21,15 @@ public class Menu {
 
     public Menu() throws Exception {
         commandHandlers = new HashMap<>();
+        commandHandlers.put("show",words->{
+            if (fileOpened) {
+            try{
+                handleShow(words);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }} else {
+            System.out.println("Open a file first.");
+        }});
         commandHandlers.put("open", this::openFile);
         commandHandlers.put("save",s -> saveFile());
         commandHandlers.put("saveas", this::saveFileAs);
@@ -35,11 +44,9 @@ public class Menu {
                     handleBooksCommand(words);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
-                }
-            } else {
+                }} else {
                 System.out.println("Open a file first.");
-            }
-        });
+            }});
         commandHandlers.put("users", words -> {
             if (fileOpened) {
                 if (currentUser instanceof AdminUserClass) {
@@ -47,19 +54,17 @@ public class Menu {
                         handleUsersCommand(words);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
-                    }
-                } else {
+                    }} else {
                     System.out.println("You must be logged in as adminUser to access user commands.");
-                }
-            } else {
+                }} else {
                 System.out.println("Open a file first.");
             }
         });
 
         books = new ArrayList<>();
         normalUsers = new ArrayList<>();
-        adminUser = new AdminUserClass("admin", "i<3c++", true);
-        nonUser = new NonUserClass("non_user", "12345", false);
+        adminUser = new AdminUserClass("admin", "i<3c++");
+        nonUser = new NonUserClass("non_user", "12345");
         currentUser = adminUser;
         fileName = null;
         uniqueNumbers = new HashSet<>();
@@ -88,7 +93,9 @@ public class Menu {
         Consumer<String[]> commandHandler = commandHandlers.getOrDefault(words[0], this::unknownCommand);
         commandHandler.accept(words);
     }
-
+    private void showUsers(){
+        currentUser.showUsers(normalUsers,adminUser);
+    }
     private void unknownCommand(String[] words) {
         System.out.println("Unknown command type help.");
     }
@@ -209,7 +216,20 @@ public class Menu {
             System.out.println("Unknown command type help.");
         }
     }
-
+    private void handleShow(String[] words){
+        if(words.length>1){
+            switch (words[1]){
+                case "users":
+                    showUsers();
+                    break;
+                default:
+                    System.out.println("Unknown command type help.");
+            }
+        }
+        else {
+            System.out.println("Incomplete command.");
+        }
+    }
     private void handleUsersCommand(String[] words) throws Exception {
         if (words.length > 1)
         {
@@ -232,10 +252,10 @@ public class Menu {
 
     private void bookAll(){
         if(currentUser instanceof AdminUserClass) {
-            ((AdminUserClass)currentUser).bookAll(books);
+            (currentUser).bookAll(books);
         }
         else if(currentUser instanceof NormalUserClass){
-            ((NormalUserClass)currentUser).bookAll(books);
+            (currentUser).bookAll(books);
         }
         else{
             System.out.println("You should be logged in to use this command.");
@@ -252,10 +272,10 @@ public class Menu {
                 }
             }
             if(currentUser instanceof AdminUserClass) {
-                ((AdminUserClass)currentUser).bookFind(books, tag, option.toString());
+                currentUser.bookFind(books, tag, option.toString());
             }
             else if(currentUser instanceof NormalUserClass){
-                ((NormalUserClass)currentUser).bookFind(books, tag, option.toString());
+                currentUser.bookFind(books, tag, option.toString());
             }
             else{
                 System.out.println("You should be logged in to use this command.");
@@ -271,23 +291,22 @@ public class Menu {
             if (words.length > 3) {
                 sortOrder = words[3];
                 if(currentUser instanceof AdminUserClass) {
-                    ((AdminUserClass)currentUser).bookSort(books, sortOption, sortOrder);
+                    (currentUser).bookSort(books, sortOption, sortOrder);
                 }
                 else if(currentUser instanceof NormalUserClass){
-                    ((NormalUserClass)currentUser).bookSort(books, sortOption, sortOrder);
+                    (currentUser).bookSort(books, sortOption, sortOrder);
                 }
                 else{
                     System.out.println("You should be logged in to use this command.");
                 }
-            }
-            if(currentUser instanceof AdminUserClass) {
-                ((AdminUserClass)currentUser).bookSort(books, sortOption, sortOrder);
-            }
-            else if(currentUser instanceof NormalUserClass){
-                ((NormalUserClass)currentUser).bookSort(books, sortOption, sortOrder);
-            }
-            else{
-                System.out.println("You should be logged in to use this command.");
+            }else {
+                if (currentUser instanceof AdminUserClass) {
+                    ( currentUser).bookSort(books, sortOption, sortOrder);
+                } else if (currentUser instanceof NormalUserClass) {
+                    (currentUser).bookSort(books, sortOption, sortOrder);
+                } else {
+                    System.out.println("You should be logged in to use this command.");
+                }
             }
         } else {
             System.out.println("Your syntax os wrong write help to see how.");
@@ -297,10 +316,10 @@ public class Menu {
         if (words.length > 2) {
             String isbnValue = words[2];
             if(currentUser instanceof AdminUserClass) {
-                ((AdminUserClass)currentUser).bookInfo(books,isbnValue);
+                (currentUser).bookInfo(books,isbnValue);
             }
             else if(currentUser instanceof NormalUserClass){
-                ((NormalUserClass)currentUser).bookInfo(books,isbnValue);
+                (currentUser).bookInfo(books,isbnValue);
             }
             else{
                 System.out.println("You should be logged in to use this command.");
@@ -311,10 +330,10 @@ public class Menu {
     }
     private void bookView(){
         if(currentUser instanceof AdminUserClass) {
-            ((AdminUserClass)currentUser).bookView(books);
+            (currentUser).bookView(books);
         }
         else if(currentUser instanceof NormalUserClass){
-            ((NormalUserClass)currentUser).bookView(books);
+            (currentUser).bookView(books);
         }
         else{
             System.out.println("You should be logged in to use this command.");
@@ -322,7 +341,7 @@ public class Menu {
     }
     private void bookAdd() throws Exception {
         if(currentUser instanceof AdminUserClass) {
-            ((AdminUserClass)currentUser).bookAdd(books,uniqueNumbers);
+            ((AdminUserClass) currentUser).bookAdd(books,uniqueNumbers);
         }
         else{
             System.out.println("You should be admin to use this command.");
@@ -331,13 +350,12 @@ public class Menu {
     private void bookRemove(String[] words ) throws Exception {
         if(words.length > 2){
             System.out.println("Wrong syntax.");
-
         }
         else {
-            System.out.println("Write the unique number of the book: ");
-            String unique_number = reader.readLine();
             if (currentUser instanceof AdminUserClass) {
-                ((AdminUserClass) currentUser).removeBookByUniqueNumber(books, unique_number);
+                System.out.println("Write the unique number of the book: ");
+                String unique_number = reader.readLine();
+                ((AdminUserClass) currentUser).removeBookByUniqueNumber(books, unique_number, uniqueNumbers);
             } else {
                 System.out.println("You should be admin to use this command.");
             }

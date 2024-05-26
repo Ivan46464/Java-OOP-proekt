@@ -3,8 +3,8 @@ import java.util.ArrayList;
 
 public class NonUserClass extends User {
 
-    public NonUserClass(String Username, String Password, Boolean Availability)throws Exception {
-        super(Username, Password, Availability);
+    public NonUserClass(String Username, String Password)throws Exception {
+        super(Username, Password);
     }
 
     public User login(ArrayList<NormalUserClass> normal_users, AdminUserClass admin_user, NonUserClass user) {

@@ -14,7 +14,8 @@ public class Book implements Serializable {
     private ArrayList<String> KeyWords =new ArrayList<>();
     private double Rating;
     private String UniqueNumber;
-    public Book(String Title, String Author, String Genre, String Resume, int RealiseYear, ArrayList<String> KeyWords,double Rating, String UniqueNumber) throws Exception{
+    public Book(String Title, String Author, String Genre, String Resume, int RealiseYear,
+                ArrayList<String> KeyWords,double Rating, String UniqueNumber) throws Exception{
         setAuthor(Author);
         setTitle(Title);
         setGenre(Genre);
