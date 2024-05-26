@@ -165,14 +165,6 @@ public abstract class User implements Serializable {
         current_user = (NonUserClass) user;
         return current_user;
     }
-    public void showUsers(ArrayList<NormalUserClass> normal_users, AdminUserClass admin){
-        System.out.println("Normal users: ");
-        for(NormalUserClass normalUser: normal_users){
-            System.out.println("Username: " + normalUser.getUsername());
-        }
-        System.out.println("Admins: ");
-        System.out.println("Username: "+ admin.getUsername());
-    }
 
 
 }

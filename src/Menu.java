@@ -21,15 +21,6 @@ public class Menu {
 
     public Menu() throws Exception {
         commandHandlers = new HashMap<>();
-        commandHandlers.put("show",words->{
-            if (fileOpened) {
-            try{
-                handleShow(words);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }} else {
-            System.out.println("Open a file first.");
-        }});
         commandHandlers.put("open", this::openFile);
         commandHandlers.put("save",s -> saveFile());
         commandHandlers.put("saveas", this::saveFileAs);
@@ -92,9 +83,6 @@ public class Menu {
     private void handleCommand(String[] words) {
         Consumer<String[]> commandHandler = commandHandlers.getOrDefault(words[0], this::unknownCommand);
         commandHandler.accept(words);
-    }
-    private void showUsers(){
-        currentUser.showUsers(normalUsers,adminUser);
     }
     private void unknownCommand(String[] words) {
         System.out.println("Unknown command type help.");
@@ -214,20 +202,6 @@ public class Menu {
             }
         } else {
             System.out.println("Unknown command type help.");
-        }
-    }
-    private void handleShow(String[] words){
-        if(words.length>1){
-            switch (words[1]){
-                case "users":
-                    showUsers();
-                    break;
-                default:
-                    System.out.println("Unknown command type help.");
-            }
-        }
-        else {
-            System.out.println("Incomplete command.");
         }
     }
     private void handleUsersCommand(String[] words) throws Exception {
