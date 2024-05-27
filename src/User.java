@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Scanner;
-
 public abstract class User implements Serializable {
-
     private String username;
     private String password;
     private transient Scanner sc;
@@ -22,11 +20,9 @@ public abstract class User implements Serializable {
         }
         this.username = username;
     }
-
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) throws InvalidPasswordException {
         if (password == null || password.length() < 5) {
             throw new InvalidPasswordException("Password cannot be null or empty or smaller than 5 characters");
@@ -36,11 +32,9 @@ public abstract class User implements Serializable {
     public String getUsername() {
         return username;
     }
-
     public Scanner getSc() {
         return sc;
     }
-
     public void setSc(Scanner sc) {
         this.sc = sc;
     }
@@ -121,7 +115,6 @@ public abstract class User implements Serializable {
             System.out.println("There is no books in the library.");
         }
     }
-
     public void bookInfo(ArrayList<Book> books, String unique_number){
         Book bookInfo = null;
         for(Book book:books){

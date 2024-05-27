@@ -56,7 +56,7 @@ public class Menu {
         normalUsers = new ArrayList<>();
         adminUser = new AdminUserClass("admin", "i<3c++");
         nonUser = new NonUserClass("non_user", "12345");
-        currentUser = adminUser;
+        currentUser = nonUser;
         fileName = null;
         uniqueNumbers = new HashSet<>();
         uniqueUsernames = new HashSet<>();
@@ -79,7 +79,6 @@ public class Menu {
             e.printStackTrace();
         }
     }
-
     private void handleCommand(String[] words) {
         Consumer<String[]> commandHandler = commandHandlers.getOrDefault(words[0], this::unknownCommand);
         commandHandler.accept(words);
@@ -87,7 +86,6 @@ public class Menu {
     private void unknownCommand(String[] words) {
         System.out.println("Unknown command type help.");
     }
-
     private void openFile(String[] words) {
         if (!this.fileOpened && words.length == 2) {
             fileName = words[1];
@@ -98,16 +96,13 @@ public class Menu {
         } else {
             System.out.println("Type help if you need to see the commands.");
         }
-    }
-
-    private void saveFile() {
+    }private void saveFile() {
         if (fileOpened) {
             FileHandler.writeToFile(fileName, books, normalUsers,uniqueNumbers,uniqueUsernames);
         } else {
             System.out.println("No file is currently opened.");
         }
     }
-
     private void saveFileAs(String[] words) {
         if (fileOpened) {
             if (words.length > 1) {
@@ -120,9 +115,7 @@ public class Menu {
         } else {
             System.out.println("No file is currently opened.");
         }
-    }
-
-    private void closeFile() {
+    }private void closeFile() {
         if (fileOpened) {
             FileHandler.closeFile(fileName);
             fileOpened = false;
@@ -134,9 +127,7 @@ public class Menu {
         } else {
             System.out.println("No file is currently opened.");
         }
-    }
-
-    private void displayHelp() {
+    }private void displayHelp() {
         System.out.println("login You login in your account.");
         System.out.println("logout You logout of your account.");
         System.out.println("open <FileName> You open a file and its content.");
@@ -153,7 +144,6 @@ public class Menu {
         System.out.println("users add <user> <password> Adds a new user with username <user> and password <password>. The user and his password are saved to a file.");
         System.out.println("users remove <user_id> Deletes the user with username id <user_id> from the file.");
     }
-
     private void login(String[] words) {
         if (words.length < 2) {
             if (currentUser instanceof NonUserClass) {
@@ -162,16 +152,13 @@ public class Menu {
                 System.out.println("You have already logged in.");
             }
         }
-    }
-
-    private void logout() {
+    }private void logout() {
         if (currentUser instanceof AdminUserClass) {
             currentUser = ((AdminUserClass) currentUser).logout(nonUser);
         } else if (currentUser instanceof NormalUserClass) {
             currentUser = ((NormalUserClass) currentUser).logout(nonUser);
         }
     }
-
     private void handleBooksCommand(String[] words) throws Exception {
         if (words.length > 1) {
             switch (words[1]) {
@@ -222,9 +209,7 @@ public class Menu {
         else {
             System.out.println("Incomplete command.");
         }
-    }
-
-    private void bookAll(){
+    }private void bookAll(){
         if(currentUser instanceof AdminUserClass) {
             (currentUser).bookAll(books);
         }
@@ -257,8 +242,7 @@ public class Menu {
         } else {
             System.out.println("Your syntax is wrong. Write 'help' to see how.");
         }
-    }
-    private void bookSort(String[] words){
+    }private void bookSort(String[] words){
         if (words.length > 2) {
             String sortOption = words[2];
             String sortOrder = "asc"; // Default to ascending order
@@ -301,8 +285,7 @@ public class Menu {
         } else {
             System.out.println("Your syntax os wrong write help to see how.");
         }
-    }
-    private void bookView(){
+    }private void bookView(){
         if(currentUser instanceof AdminUserClass) {
             (currentUser).bookView(books);
         }
@@ -312,8 +295,7 @@ public class Menu {
         else{
             System.out.println("You should be logged in to use this command.");
         }
-    }
-    private void bookAdd() throws Exception {
+    }private void bookAdd() throws Exception {
         if(currentUser instanceof AdminUserClass) {
             ((AdminUserClass) currentUser).bookAdd(books,uniqueNumbers);
         }
@@ -334,8 +316,7 @@ public class Menu {
                 System.out.println("You should be admin to use this command.");
             }
         }
-    }
-    private void userAdd(String[] words) throws Exception{
+    }private void userAdd(String[] words) throws Exception{
         if (words.length > 3) {
             String username = words[2];
             String password = words[3];

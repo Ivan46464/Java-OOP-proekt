@@ -16,19 +16,20 @@ public class NonUserClass extends User {
             System.out.println("Console not available.");
         }
 
-        System.out.println("Write your password: ");
-        char[] passwordChars = console.readPassword();
-        String password = new String(passwordChars);
-
-        
-        for (int i = 0; i < passwordChars.length; i++) {
-            passwordChars[i] = '\0';
-        }
+        System.out.println("Write your password(* start): ");
+        String password = PasswordField.readPassword("");
+//        char[] passwordChars = console.readPassword();
+//        String password = new String(passwordChars);
+//
+//
+//        for (int i = 0; i < passwordChars.length; i++) {
+//            passwordChars[i] = '\0';
+//        }
 
         for (NormalUserClass normal_user : normal_users) {
             if (Username.equals(normal_user.getUsername()) & password.equals(normal_user.getPassword())) {
-                current_user = (NormalUserClass) normal_user;
-                System.out.println("Welcome " + current_user.getUsername());
+                current_user =  normal_user;
+                System.out.println("\nWelcome " + current_user.getUsername());
                 return current_user;
 
             }
@@ -36,8 +37,8 @@ public class NonUserClass extends User {
         }
         if (current_user == null) {
             if (admin_user.getUsername().equals(Username) & admin_user.getPassword().equals(password)) {
-                current_user = (AdminUserClass) admin_user;
-                System.out.println("Welcome " + current_user.getUsername());
+                current_user =  admin_user;
+                System.out.println("\nWelcome " + current_user.getUsername());
             } else {
                 System.out.println("There is no user with such password or username.");
                 current_user = (NonUserClass) user;
