@@ -2,10 +2,9 @@ import Exceptions.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Book implements Serializable {
-
-
     private String Author;
     private String Title;
     private String Genre;
@@ -121,6 +120,18 @@ public class Book implements Serializable {
             throw new InvalidUniqueNumberException("Unique number cannot be null or empty");
         }
         this.UniqueNumber = UniqueNumber;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Book book = (Book) o;
+        return Objects.equals(UniqueNumber, book.UniqueNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(UniqueNumber);
     }
 }
 

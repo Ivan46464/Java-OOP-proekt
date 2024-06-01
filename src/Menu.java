@@ -7,32 +7,57 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class Menu {
-    private final Map<String, Consumer<String[]>> commandHandlers;
-    private ArrayList<Book> books;
-    private ArrayList<NormalUserClass> normalUsers;
-    private AdminUserClass adminUser;
-    private NonUserClass nonUser;
+    private Map<String, Consumer<String[]>> commandHandlers;
+    private  Map<String, Consumer<String[]>> commandHandlerBook;
+    private  Map<String, Consumer<String[]>> commandHandlerUser;
     private User currentUser;
     private String fileName;
-    private HashSet<String> uniqueNumbers;
-    private HashSet<String> uniqueUsernames;
+    private Library library;
     private boolean fileOpened = false;
     private final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
     public Menu() throws Exception {
+        commands();
+        library = new Library();
+        currentUser =  library.getUsers().stream()
+                .filter(user -> user instanceof NonUserClass)
+                .findFirst()
+                .orElseThrow(() -> new Exception("NonUser not found in the library."));
+        fileName = null;
+
+
+    }
+    public void commands(){
         commandHandlers = new HashMap<>();
+        commandHandlerBook = new HashMap<>();
+        commandHandlerUser = new HashMap<>();
         commandHandlers.put("open", this::openFile);
         commandHandlers.put("save",s -> saveFile());
         commandHandlers.put("saveas", this::saveFileAs);
-        commandHandlers.put("close", s -> closeFile());
+        commandHandlers.put("close", s -> {
+            try{
+                closeFile();
+            } catch (Exception e)
+            {System.out.println(e.getMessage());}});
         commandHandlers.put("help", s -> displayHelp());
-        commandHandlers.put("login", this::login);
-        commandHandlers.put("logout", s -> logout());
+        commandHandlers.put("login", words->{
+            try {
+                login(words);
+            }catch(Exception e){
+                System.out.println(e.getMessage());
+            }});
+        commandHandlers.put("logout", s -> {
+            try {
+                logout();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         commandHandlers.put("exit", s -> {});
         commandHandlers.put("books", words -> {
             if (fileOpened) {
                 try {
-                    handleBooksCommand(words);
+                    handleCommandBook(words);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }} else {
@@ -42,7 +67,7 @@ public class Menu {
             if (fileOpened) {
                 if (currentUser instanceof AdminUserClass) {
                     try {
-                        handleUsersCommand(words);
+                        handleCommandUser(words);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }} else {
@@ -51,17 +76,35 @@ public class Menu {
                 System.out.println("Open a file first.");
             }
         });
-
-        books = new ArrayList<>();
-        normalUsers = new ArrayList<>();
-        adminUser = new AdminUserClass("admin", "i<3c++");
-        nonUser = new NonUserClass("non_user", "12345");
-        currentUser = nonUser;
-        fileName = null;
-        uniqueNumbers = new HashSet<>();
-        uniqueUsernames = new HashSet<>();
+        commandHandlerBook.put("add", s-> {
+            try {
+                bookAdd();
+            }catch (Exception e){
+                System.out.println(e.getMessage());
+            }
+        });
+        commandHandlerBook.put("all", s-> bookAll());
+        commandHandlerBook.put("view", s->bookView());
+        commandHandlerBook.put("info", this::bookInfo);
+        commandHandlerBook.put("remove", words->{
+            try{
+                bookRemove(words);
+            }
+            catch (Exception e){
+                System.out.println(e.getMessage());
+            }
+        });
+        commandHandlerBook.put("find", this::bookFind);
+        commandHandlerBook.put("sort", this::bookSort);
+        commandHandlerUser.put("add", words-> {
+            try {
+                userAdd(words);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        commandHandlerUser.put("remove",words-> userRemove(words));
     }
-
     public void startCommandPrompt() {
         try {
             System.out.println("Opened a new command prompt.");
@@ -83,22 +126,31 @@ public class Menu {
         Consumer<String[]> commandHandler = commandHandlers.getOrDefault(words[0], this::unknownCommand);
         commandHandler.accept(words);
     }
+    private void handleCommandBook(String[] words) {
+        Consumer<String[]> commandHandler = commandHandlerBook.getOrDefault(words[1], this::unknownCommand);
+        commandHandler.accept(words);
+    }
+    private void handleCommandUser(String[] words) {
+        Consumer<String[]> commandHandler = commandHandlerUser.getOrDefault(words[1], this::unknownCommand);
+        commandHandler.accept(words);
+    }
     private void unknownCommand(String[] words) {
         System.out.println("Unknown command type help.");
     }
     private void openFile(String[] words) {
         if (!this.fileOpened && words.length == 2) {
             fileName = words[1];
-            FileHandler.readFromFile(fileName, books, normalUsers,uniqueNumbers,uniqueUsernames);
+            FileHandler.readFromFile(fileName, library.getBooks(), library.getUsers());
             this.fileOpened = true;
         } else if (this.fileOpened) {
             System.out.println("A file is already opened.");
         } else {
             System.out.println("Type help if you need to see the commands.");
         }
-    }private void saveFile() {
+    }
+    private void saveFile() {
         if (fileOpened) {
-            FileHandler.writeToFile(fileName, books, normalUsers,uniqueNumbers,uniqueUsernames);
+            FileHandler.writeToFile(fileName, library.getBooks(), library.getUsers());
         } else {
             System.out.println("No file is currently opened.");
         }
@@ -107,7 +159,7 @@ public class Menu {
         if (fileOpened) {
             if (words.length > 1) {
                 String dir = words[1];
-                FileHandler.writeToFile_dir(dir, fileName, books, normalUsers,uniqueNumbers,uniqueUsernames);
+                FileHandler.writeToFile_dir(dir, fileName, library.getBooks(), library.getUsers());
                 System.out.println("Successfully saved " + fileName + " in " + dir);
             } else {
                 System.out.println("Specify the directory where you want to save the file.");
@@ -115,19 +167,22 @@ public class Menu {
         } else {
             System.out.println("No file is currently opened.");
         }
-    }private void closeFile() {
+    }
+    private void closeFile() throws Exception {
         if (fileOpened) {
             FileHandler.closeFile(fileName);
             fileOpened = false;
             fileName = null;
-            books.clear();
-            normalUsers.clear();
-            uniqueNumbers.clear();
-            uniqueUsernames.clear();
+            library.getBooks().clear();
+            library.getUsers().clear();
+            library.getUsers().add(new AdminUserClass("admin", "i<3c++"));
+            library.getUsers().add(new NonUserClass("non_user", "12345"));
+            logoutForClosedFile();
         } else {
             System.out.println("No file is currently opened.");
         }
-    }private void displayHelp() {
+    }
+    private void displayHelp() {
         System.out.println("login You login in your account.");
         System.out.println("logout You logout of your account.");
         System.out.println("open <FileName> You open a file and its content.");
@@ -144,77 +199,31 @@ public class Menu {
         System.out.println("users add <user> <password> Adds a new user with username <user> and password <password>. The user and his password are saved to a file.");
         System.out.println("users remove <user_id> Deletes the user with username id <user_id> from the file.");
     }
-    private void login(String[] words) {
+    private void login(String[] words) throws Exception {
         if (words.length < 2) {
             if (currentUser instanceof NonUserClass) {
-                currentUser = ((NonUserClass) currentUser).login(normalUsers, adminUser, nonUser);
+                currentUser = library.login();
             } else {
                 System.out.println("You have already logged in.");
             }
         }
-    }private void logout() {
-        if (currentUser instanceof AdminUserClass) {
-            currentUser = ((AdminUserClass) currentUser).logout(nonUser);
-        } else if (currentUser instanceof NormalUserClass) {
-            currentUser = ((NormalUserClass) currentUser).logout(nonUser);
-        }
     }
-    private void handleBooksCommand(String[] words) throws Exception {
-        if (words.length > 1) {
-            switch (words[1]) {
-                case "all":
-                    bookAll();
-                    break;
-                case "find":
-                    bookFind(words);
-                    break;
-                case "sort":
-                    bookSort(words);
-                    break;
-                case "info":
-                    bookInfo(words);
-                    break;
-                case "view":
-                    bookView();
-                    break;
-                case "add":
-                    bookAdd();
-                    break;
-                case "remove":
-                    bookRemove(words);
-                    break;
-                default:
-                    System.out.println("Unknown command type help.");
-                    break;
-            }
-        } else {
-            System.out.println("Unknown command type help.");
-        }
+    private void logoutForClosedFile() throws Exception {
+        currentUser = library.getUsers().stream()
+                .filter(user -> user instanceof NonUserClass)
+                .findFirst()
+                .orElseThrow(() -> new Exception("NonUser not found in the library."));
     }
-    private void handleUsersCommand(String[] words) throws Exception {
-        if (words.length > 1)
-        {
-            switch (words[1]) {
-                case "add":
-                    userAdd(words);
-                    break;
-                case "remove":
-                    userRemove(words);
-                    break;
-                default:
-                    System.out.println("Unknown command type help.");
-                    break;
-            }
-        }
-        else {
-            System.out.println("Incomplete command.");
-        }
-    }private void bookAll(){
-        if(currentUser instanceof AdminUserClass) {
-            (currentUser).bookAll(books);
-        }
-        else if(currentUser instanceof NormalUserClass){
-            (currentUser).bookAll(books);
+    private void logout() throws Exception {
+        currentUser = library.getUsers().stream()
+                .filter(user -> user instanceof NonUserClass)
+                .findFirst()
+                .orElseThrow(() -> new Exception("NonUser not found in the library."));
+        System.out.println("You have successfully logged out.");
+    }
+    private void bookAll(){
+        if(!(currentUser instanceof NonUserClass)) {
+            library.booksAll();
         }
         else{
             System.out.println("You should be logged in to use this command.");
@@ -230,11 +239,8 @@ public class Menu {
                     option.append(" ");
                 }
             }
-            if(currentUser instanceof AdminUserClass) {
-                currentUser.bookFind(books, tag, option.toString());
-            }
-            else if(currentUser instanceof NormalUserClass){
-                currentUser.bookFind(books, tag, option.toString());
+            if(!(currentUser instanceof NonUserClass)) {
+                library.booksFind(tag, String.valueOf(option));
             }
             else{
                 System.out.println("You should be logged in to use this command.");
@@ -242,26 +248,22 @@ public class Menu {
         } else {
             System.out.println("Your syntax is wrong. Write 'help' to see how.");
         }
-    }private void bookSort(String[] words){
+    }
+    private void bookSort(String[] words){
         if (words.length > 2) {
             String sortOption = words[2];
             String sortOrder = "asc"; // Default to ascending order
             if (words.length > 3) {
                 sortOrder = words[3];
-                if(currentUser instanceof AdminUserClass) {
-                    (currentUser).bookSort(books, sortOption, sortOrder);
-                }
-                else if(currentUser instanceof NormalUserClass){
-                    (currentUser).bookSort(books, sortOption, sortOrder);
+                if(!(currentUser instanceof NonUserClass)) {
+                    library.booksSort(sortOption,sortOrder);
                 }
                 else{
                     System.out.println("You should be logged in to use this command.");
                 }
             }else {
-                if (currentUser instanceof AdminUserClass) {
-                    ( currentUser).bookSort(books, sortOption, sortOrder);
-                } else if (currentUser instanceof NormalUserClass) {
-                    (currentUser).bookSort(books, sortOption, sortOrder);
+                if(!(currentUser instanceof NonUserClass)) {
+                    library.booksSort(sortOption,sortOrder);
                 } else {
                     System.out.println("You should be logged in to use this command.");
                 }
@@ -273,11 +275,8 @@ public class Menu {
     private void bookInfo(String[] words){
         if (words.length > 2) {
             String isbnValue = words[2];
-            if(currentUser instanceof AdminUserClass) {
-                (currentUser).bookInfo(books,isbnValue);
-            }
-            else if(currentUser instanceof NormalUserClass){
-                (currentUser).bookInfo(books,isbnValue);
+            if(!(currentUser instanceof NonUserClass)) {
+               library.booksInfo(isbnValue);
             }
             else{
                 System.out.println("You should be logged in to use this command.");
@@ -285,19 +284,18 @@ public class Menu {
         } else {
             System.out.println("Your syntax os wrong write help to see how.");
         }
-    }private void bookView(){
-        if(currentUser instanceof AdminUserClass) {
-            (currentUser).bookView(books);
-        }
-        else if(currentUser instanceof NormalUserClass){
-            (currentUser).bookView(books);
+    }
+    private void bookView(){
+        if(!(currentUser instanceof NonUserClass)) {
+            library.booksView();
         }
         else{
             System.out.println("You should be logged in to use this command.");
         }
-    }private void bookAdd() throws Exception {
+    }
+    private void bookAdd() throws Exception {
         if(currentUser instanceof AdminUserClass) {
-            ((AdminUserClass) currentUser).bookAdd(books,uniqueNumbers);
+            library.bookAdd();
         }
         else{
             System.out.println("You should be admin to use this command.");
@@ -311,17 +309,18 @@ public class Menu {
             if (currentUser instanceof AdminUserClass) {
                 System.out.println("Write the unique number of the book: ");
                 String unique_number = reader.readLine();
-                ((AdminUserClass) currentUser).removeBookByUniqueNumber(books, unique_number, uniqueNumbers);
+                library.removeBookByUniqueNumber(unique_number);
             } else {
                 System.out.println("You should be admin to use this command.");
             }
         }
-    }private void userAdd(String[] words) throws Exception{
+    }
+    private void userAdd(String[] words) throws Exception{
         if (words.length > 3) {
             String username = words[2];
             String password = words[3];
             if(currentUser instanceof AdminUserClass) {
-                ((AdminUserClass)currentUser).addUser(normalUsers, username, password,uniqueUsernames);
+                library.addUser(username,password);
             }
             else{
                 System.out.println("You should be admin to add users.");
@@ -334,7 +333,7 @@ public class Menu {
         if (words.length > 2) {
             String username = words[2];
             if(currentUser instanceof AdminUserClass) {
-                ((AdminUserClass)currentUser).removeUser(normalUsers, username,uniqueUsernames);
+                library.removeUser(username);
             }
             else{
                 System.out.println("You should be admin to add users.");
